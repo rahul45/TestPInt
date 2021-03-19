@@ -10,7 +10,8 @@ public class Test extends Thread {
 	}
 
 	public static void main(String[] args) {
-
+		Test t = new Test();
+		t.start();
 	}
 
 	public void p1(List<String> list) {
