@@ -23,7 +23,7 @@ package com.threadings;
  *
  */
 public class SynchronizedExample {
-    public static void main(String[] args) {
+    public static void main1(String[] args) {
         CalCulator cal = new CalCulator();
 
         Runnable runnable1 = ()->{
@@ -49,8 +49,33 @@ public class SynchronizedExample {
         t2.start();
     }
 
-    public  static void main1(String[] args) {
+    //Static example
+    public  static void main(String[] args) {
+        MyStaticCounter sc = new MyStaticCounter();
 
+        Runnable runnable1 = ()->{
+//            for(int i=0;i<1_000_000;i++){
+//                cal.add();
+//            }
+            sc.add(12);
+            //System.out.println("Count:: "+sc.add(12));
+        };
+        MyStaticCounter sc1 = new MyStaticCounter();
+
+        Runnable runnable2 = ()->{
+//            for(int i=0;i<1_000_000;i++){
+//                cal.add();
+//            }
+            sc1.subtract(12);
+            //System.out.println("Count:: "+cal.sub());
+        };
+
+
+        Thread t1=  new Thread(runnable1,"t1");
+        Thread t2 = new Thread(runnable2,"t2");
+
+        t1.start();
+        t2.start();
     }
 }
 
@@ -125,9 +150,24 @@ class  MyStaticCounter{
 
     private static int count = 0;
 
-    public static synchronized void add(int value){
+    public static synchronized void add(int value) {
 
         count += value;
+        for (int i = 0; i < 5; i++) {
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+
+            }
+            System.out.println("Sub method ...CurrentThread--" + Thread.currentThread().getName());
+        }
+    }
+
+
+    public static synchronized void subtract(int value){
+
+        count -= value;
+        for (int i = 0; i < 5; i++) {
         try {
             Thread.sleep(1000);
         }catch (Exception e){
@@ -136,16 +176,5 @@ class  MyStaticCounter{
         System.out.println("Sub method ...CurrentThread--"+Thread.currentThread().getName());
 
     }
-
-    public static synchronized void subtract(int value){
-
-        count -= value;
-        try {
-            Thread.sleep(1000);
-        }catch (Exception e){
-
-        }
-        System.out.println("Sub method ...CurrentThread--"+Thread.currentThread().getName());
-
     }
 }
