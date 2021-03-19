@@ -48,6 +48,10 @@ public class SynchronizedExample {
         t1.start();
         t2.start();
     }
+
+    public  static void main1(String[] args) {
+
+    }
 }
 
 class CalCulator{
@@ -95,15 +99,53 @@ class CalCulator{
 
 }
 
+/**
+ * Static methods are marked as synchronized just like instance methods using the synchronized keyword.
+ * Here is a Java synchronized static method example:
+ *
+ * Also here the synchronized keyword tells Java that the add() method is synchronized.
+ *
+ * Synchronized static methods are synchronized on the class object of the class the synchronized static method belongs to.
+ * Since only one class object exists in the Java VM per class,
+ * only one thread can execute inside a static synchronized method in the same class.
+ *
+ * In case a class contains more than one static synchronized method,
+ * only one thread can execute inside any of these methods at the same time.
+ * Look at this static synchronized method example:
+ *
+ *
+ * Only one thread can execute inside any of the two add() and subtract() methods at any given time.
+ * If Thread A is executing add() then Thread B cannot execute neither add() nor subtract() until Thread A has exited add().
+ *
+ * If the static synchronized methods are located in different classes, then one thread can execute inside the static
+ * synchronized methods of each class. One thread per class regardless of which static synchronized method it calls.
+ *
+ */
 class  MyStaticCounter{
 
     private static int count = 0;
 
     public static synchronized void add(int value){
-        count += value;
-        }
 
-        public static synchronized void subtract(int value){
-        count -= value;
+        count += value;
+        try {
+            Thread.sleep(1000);
+        }catch (Exception e){
+
         }
+        System.out.println("Sub method ...CurrentThread--"+Thread.currentThread().getName());
+
+    }
+
+    public static synchronized void subtract(int value){
+
+        count -= value;
+        try {
+            Thread.sleep(1000);
+        }catch (Exception e){
+
+        }
+        System.out.println("Sub method ...CurrentThread--"+Thread.currentThread().getName());
+
+    }
 }
