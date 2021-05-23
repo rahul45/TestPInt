@@ -174,7 +174,6 @@ class  MyStaticCounter{
 
         }
         System.out.println("Sub method ...CurrentThread--"+Thread.currentThread().getName());
-
-    }
+        }
     }
 }
