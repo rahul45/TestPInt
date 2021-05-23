@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 public interface Draws {
  //void draw();
- void dis(int q);
+ void dis(int a);
+ void add(int a,int b);
  
 }
