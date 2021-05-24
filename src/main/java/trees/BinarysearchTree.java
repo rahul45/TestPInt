@@ -4,9 +4,15 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class BinarysearchTree {
-	public BinarysearchTree() {
+	Node root;
+	public BinarysearchTree(int value) {
+		root = new Node(value);
+
 	}
-	
+	public BinarysearchTree() {
+		root = null;
+	}
+
 	static class Node{
 		int value;
 		Node left,right;
@@ -28,6 +34,9 @@ public class BinarysearchTree {
 	}
 	public static void main(String[] args) {
 		System.out.println("HI Rahul ");
+		BinarysearchTree bst = new BinarysearchTree();
+		Node a = new Node(2);
+		bst.insertElement(a,12);
 	
 	}
 }
