@@ -3,8 +3,6 @@ package com.test;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sortings.P;
-
 public class t{
 
 	public static void p(){
