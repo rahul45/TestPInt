@@ -1,8 +1,6 @@
 package collections;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Apps {
 	public static void main(String[] args) {
@@ -19,5 +17,12 @@ public class Apps {
 	        Collections.sort(employees);
 	        // Default Sorting by employee id
 	        System.out.println(employees);
+
+		Map<String,Integer> map = new HashMap<>();
+		map.put("A",1);
+		map.put("B",2);
+
+		System.out.println(map.get("A"));
+		System.out.println(map.get("P"));
 	}
 }

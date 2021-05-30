@@ -21,4 +21,10 @@ public class BinaryTree {
     void insert(Node node,int item){
 
     }
+
+    public static void main(String[] args) {
+        BinaryTree bt = new BinaryTree();
+        Node root = new Node(1);
+        bt.insert(root,3);
+    }
 }
