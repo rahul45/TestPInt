@@ -23,7 +23,10 @@ public class ShallowCopyInJava
 
         //Printing the subject3 of 'student1'
 
-        System.out.println(student1.course.subject3);         //Output : Biology
+        System.out.println(student1.course.subject3);
+
+        System.out.println(student2.course.subject3);
+        //Output : Biology
 
         //Changing the subject3 of 'student2'
 
@@ -31,6 +34,7 @@ public class ShallowCopyInJava
 
         //This change will be reflected in original student 'student1'
 
-        System.out.println(student1.course.subject3);       //Output : Maths
+        System.out.println(student1.course.subject3);
+        System.out.println(student2.course.subject3);//Output : Maths
     }
 }
