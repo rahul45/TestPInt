@@ -1,4 +1,4 @@
-package com.sortings;
+package ds.sortings;
 
 public class SortM {
 public static void main(String[] args) {

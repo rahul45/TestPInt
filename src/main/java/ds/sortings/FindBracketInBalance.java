@@ -1,10 +1,8 @@
-package com.sortings;
-
-import java.util.Stack;
+package ds.sortings;
 
 public class FindBracketInBalance {
 	public static void main(String[] args) {
-		String str ="“{“,”}”,”(“,(”))))((”,”[“,”]”";
+		String str ="ï¿½{ï¿½,ï¿½}ï¿½,ï¿½(ï¿½,(ï¿½))))((ï¿½,ï¿½[ï¿½,ï¿½]ï¿½";
 		System.out.println("Is String Valid-->:"+validateStr(str));
 	}
 	static boolean validateStr(String str){

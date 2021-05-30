@@ -12,7 +12,7 @@ public class RepeatedString {
         long count;
         if(n<len){
           count = getCount(s.substring(0,(int)n).toCharArray());
-          Arrays.
+
         }else{
             count = getCount(s.toCharArray());
             long remaining =(n/len);

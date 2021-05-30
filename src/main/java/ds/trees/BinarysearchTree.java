@@ -1,7 +1,4 @@
-package trees;
-
-import java.util.LinkedList;
-import java.util.Queue;
+package ds.trees;
 
 public class BinarysearchTree {
 

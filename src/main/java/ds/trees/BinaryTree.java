@@ -1,4 +1,4 @@
-package trees;
+package ds.trees;
 
 public class BinaryTree {
 

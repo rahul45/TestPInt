@@ -1,4 +1,4 @@
-package trees;
+package ds.trees;
 
 /**
  * This class will be used in tree data structure
