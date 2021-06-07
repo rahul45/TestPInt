@@ -59,9 +59,7 @@ public class StreamAPI {
     }
 
     static void add(int n){
-        if(true){
 
-        }
         int value= Stream.iterate(0,elem->elem+1)
                 .limit(n)
                 .reduce(0,(result,elem)->result+elem)
