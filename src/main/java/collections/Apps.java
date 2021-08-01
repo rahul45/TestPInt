@@ -18,11 +18,11 @@ public class Apps {
 	        // Default Sorting by employee id
 	        System.out.println(employees);
 
-		Map<String,Integer> map = new HashMap<>();
-		map.put("A",1);
-		map.put("B",2);
-
-		System.out.println(map.get("A"));
-		System.out.println(map.get("P"));
+//		Map<String,Integer> map = new HashMap<>();
+//		map.put("A",1);
+//		map.put("B",2);
+//
+//		System.out.println(map.get("A"));
+//		System.out.println(map.get("P"));
 	}
 }
