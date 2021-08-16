@@ -7,6 +7,7 @@ public class SynchronizedExample1 {
 
         Consumer<String> func = (String param) -> {
 
+
             synchronized(SynchronizedExample1.class) {
 
                 System.out.println(
