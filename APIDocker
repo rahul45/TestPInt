@@ -1,0 +1,20 @@
+FROM openjdk:8-jre
+WORKDIR /app
+ADD ./target/api-1.0-SNAPSHOT.jar .
+RUN chmod 777 /app
+
+#copy TG certs to jvm
+COPY cacerts/* /tmp/cacerts/
+
+
+
+USER root
+RUN ${JAVA_HOME}/bin/keytool -noprompt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -importcert -alias covidcert -file /tmp/cacerts/PolicyCA.cer
+
+ENV spring.profiles.active=prod
+
+
+
+USER 1001
+EXPOSE 8080
+CMD ["java", "-jar", "api-1.0-SNAPSHOT.jar"]
