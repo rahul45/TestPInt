@@ -1,0 +1,17 @@
+FROM keymetrics/pm2:latest-alpine as builder
+
+COPY package.json .
+COPY .npmrc .
+RUN npm i node-sass@4.14.0 --save  && npm i && mkdir /app /.pm2 && cp -R ./node_modules ./app && chmod 777 /.pm2
+WORKDIR /app
+
+COPY . .
+
+RUN $(npm bin)/ng build --configuration=stage --aot  && cp -R ./dist/* .
+
+
+USER 1001
+
+EXPOSE 8000
+
+CMD ["pm2-runtime", "start", "server.js"]
