@@ -1,0 +1,85 @@
+Main class
+------------------------------
+@CucumberOptions(features = Array("classpath:features/"), tags = Array("~@ignore" ))
+class AllTestsRunner {
+  @Test
+  def testParallel(): Unit = {
+    val karateOutputPath = "build/surefire-reports"
+    val results = Runner.parallel(getClass, 1, karateOutputPath)
+    generateReport(karateOutputPath) //results.getReportDir()
+    assertTrue(results.getErrorMessages, results.getFailCount == 0)
+  }
+
+
+
+
+  private def generateReport(karateOutputPath: String) = {
+    val jsonFiles = FileUtils.listFiles(new File(karateOutputPath), Array[String]("json"), true).asScala
+    val list = jsonFiles.map(_.getAbsolutePath).toList.asJava
+    val config = new Configuration(new File("build/reports/"), "api-test-results")
+    val reportBuilder = new ReportBuilder(list, config)
+    reportBuilder.generateReports
+
+  }
+}
+
+--------------------------------------------------------------
+Config file
+--------------
+function() {
+  var env = karate.env;
+  var config = {};
+  karate.log('karate.env system property was:', env);
+  karate.configure("ssl", true);
+  if(!env)
+	  {
+	  env='env'
+	  }
+  if (env == 'auto') {
+    //env = 'dev';
+
+  config = {
+    env: 'auto',
+    token :'Bearer token',
+    baseUrl:'http://localhost:8080'
+
+    };
+  }
+  if (env == 'test') {
+
+     config = {
+      env: 'test',
+      token :'Bearer '
+     };
+
+  } else if (env == 'stage') {
+
+           //env = 'stage';
+
+         config = {
+           env: 'stage',
+        token :'Bearer '
+         };
+      }
+    else if (env == 'prod') {
+
+               // env = 'prod';
+
+      config = {
+          env: 'prod',
+		   token :'o'
+              };
+           }
+      return config;
+}
+
+--------------------------------------------------------------------------------------
+Feature: Comparing data between payload with the  DB - API
+
+@test
+Scenario: test
+Given url baseUrl+'/url'
+When method Get
+Then status 200
+And match $ == {status:'#notnull',statusMessage:'#notnull',response:'#notnull'}
+
