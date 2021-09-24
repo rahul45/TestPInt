@@ -1,0 +1,93 @@
+#!/usr/bin/env groovy
+@Library("com.test.jenkins.pipeline.library@master")
+
+String dockerHost = 'docker.repo1.testu.com'
+String apiRepo = ''
+String dockerNamespace = ''
+String tagBase = "$dockerHost/$dockerNamespace"
+String tag = 'RELEASE'
+def MAVEN_BUILD = '/tools/maven/apache-maven-3.3.9'
+
+pipeline {
+    agent {
+        label 'docker-kitchensink-slave'
+    }
+    environment {
+        CREDENTIALS_ID = '_cred_id'
+        DEVOPS_METRICS_ENABLED = 'false'
+        NODEJS_VERSION = '12'
+        SONAR_ID = 'textID'
+    }
+    stages {
+        stage('Build Project') {
+
+            steps {
+                glMavenBuild pomFile: 'pom.xml',
+                        runJacocoCoverage: false,
+                        uploadJacocoResults: false
+            }
+        }
+        stage('Sonar') {
+            agent {
+                label 'docker-maven-slave'
+            }
+            steps {
+                glMavenBuild pomFile: "pom.xml", ignoreTestFailures: 'false'
+                glSonarMavenScan gitUserCredentialsId: "${env.SONAR_ID}"
+            }
+        }
+        stage('Run functional testing') {
+            steps {
+                script {
+                    withEnv(["PATH+MAVEN=$MAVEN_BUILD/bin"]) {
+                       // sh "mvn test -Dtest=AllTestsRunner"
+                         sh 'mvn test -Dtest=AllTestsRunner -DargLine="-Dkarate.env=auto" -Denv.profile=auto'
+                    }
+
+                }
+            }
+        }
+        stage('cucumber reports') {
+            steps {
+                script {
+
+                    cucumber buildStatus: 'UNSTABLE',
+                            fileIncludePattern: '**/*_api.json',
+                            trendsLimit: 10,
+                            classifications: [
+                                    [
+                                            'key'  : 'Browser',
+                                            'value': 'Internet Explorer'
+                                    ]
+                            ]
+                }
+            }
+        }
+        stage('Build & Deploy Docker Image to DTR') {
+            agent {
+                label 'docker-maven-slave'
+            }
+            steps {
+                glMavenBuild pomFile: 'pom.xml',
+                        runJacocoCoverage: false,
+                        uploadJacocoResults: false
+
+                glDockerImageBuildPush tag: "$tagBase/$apiRepo:$tag",
+                        repository: "$apiRepo",
+                        namespace: "$dockerNamespace",
+                        dockerHost: "$dockerHost",
+                        dockerCredentialsId: "$env.CREDENTIALS_ID"
+            }
+
+        }
+    }
+    post {
+        always {
+            echo 'Email Notification'
+            emailext body: "",
+                    subject: "$currentBuild.currentResult",
+                    to: ''
+        }
+    }
+
+}
