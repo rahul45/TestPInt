@@ -1,0 +1,135 @@
+#!/usr/bin/env groovy
+
+@Library("com.test.jenkins.pipeline.library@master")
+String tag = 'RELEASE'
+String dockerHost = 'test.com'
+String namespace = 'graphplatform-prod'
+String tagBase = "$dockerHost/$namespace"
+String webRepo = 'testRepo'
+String k8scluster = ""
+String k8snamespace = "";
+String deploymentName = "testUI"
+
+pipeline {
+    agent any
+    environment {
+        DOCKER_CREDENTIALS_ID = 'bda_flm'
+        OPENSHIFT_CREDENTIALS_ID = 'bda_flm'
+        DEVOPS_METRICS_ENABLED = 'false'
+        K8S_CREDENTIALS_ID = 'k8-grphpsvc-token'
+        NODEJS_VERSION = '12'
+        GIT_CREDENTIALS_ID = 'grph_cred_id'
+        SECRET_CREDENTIALS_ID = 'grph_cicd_secret_text'
+        SECRET_K8_NAMESPACE_CREDENTIALS_ID='k8graphMnrProdSvc'
+        
+    }
+
+    stages {
+
+        stage('Build and Deploy Docker Image to DTR') {
+            agent {
+                label 'docker-build-slave'
+            }
+            steps {
+                glDockerImageBuildPush tag: "$tagBase/$webRepo:$tag",
+                        repository: "$webRepo",
+                        namespace: "$namespace",
+                        dockerHost: "docker.repo1.company.com",
+                        dockerCredentialsId: "$env.GIT_CREDENTIALS_ID",
+                        extraBuildOptions: "--build-arg env_var=prod"
+                }
+        }
+
+        stage('ng Test')
+        {
+            agent{
+                label ' docker-nodejs-slave'
+            }
+            steps {
+                withCredentials([string(credentialsId:"${SECRET_CREDENTIALS_ID}", variable:'NPM_AUTH_KEY')]){
+                    command """
+                    export NPM_AUTH_KEY=""
+                    export NPM_EMAIL=""
+                    npm install --registry https://repo1.company.com/artifactory/api/npm/npm-virtual
+                    node node_modules/@angular/cli/bin/ng test --codeCoverage=true
+                    """
+                }
+            }
+        }
+       stage('Run Sonar Scan for UI ') {
+            agent {
+                label 'docker-nodejs-slave'
+            }
+            steps {
+                withCredentials([string(credentialsId:"${SECRET_CREDENTIALS_ID}", variable:'NPM_AUTH_KEY')]){
+                    command """
+                    export NPM_AUTH_KEY=""
+                    export NPM_EMAIL=""
+                    npm install --registry https://repo1.company.com/artifactory/api/npm/npm-virtual
+                    """
+                    }
+               glSonarNpmScan gitUserCredentialsId:"${env.SECRET_CREDENTIALS_ID}",
+               additionalProps:['sonar.sources':'src', 'sonar.javascript.lcov.reportPath':'coverage/lcov.info', 'sonar.ts.lcov.reportpath':'coverage/lcov.info', 'sonarCoverageExclusions':'src/assets/**', 'sonarExclusions':'src/assets/**']
+            }
+        }
+        stage('Fortify') {
+            agent {
+                label 'docker-kitchensink-slave'
+            }
+            steps {
+                glFortifyScan fortifyBuildName:"mnr-member-jrny",
+                scarUploadToken:"1111111111111111111",
+                scarProjectName:"mnr-member-jrny",
+                scarProjectVersion:"1234",
+                criticalThreshold:10,
+                highThreshold:20,
+                mediumThreshold:50,
+                lowThreshold:200,
+                // fortifyJdkVersion:"1.8",
+                uploadToScar:false,
+                wait: false
+            }
+        } 
+
+        stage('Deploy Images to Kubernetes'){
+            agent {
+                label 'docker-kitchensink-slave'
+            }
+            steps {
+                script {
+                    try {
+                        glKubernetesDelete credentials: "$env.SECRET_K8_NAMESPACE_CREDENTIALS_ID",
+                                cluster: "$k8scluster",
+                                namespace: "graph-app-mnr-prod",
+                                kind_names: ["deploy/$deploymentName"],
+                                autoNetPol: true,
+                                isProduction: false
+                    } catch (Exception e) {
+                        echo "Deletion Failed: " + e
+                    }
+                    glKubernetesCreateBasic credentials: "$env.SECRET_K8_NAMESPACE_CREDENTIALS_ID",
+                            cluster: "$k8scluster",
+                            namespace: "graph-app-mnr-prod",
+                            yaml: "deployment-prod/app-deployment.yaml --validate=false",
+                            deleteIfExists: true,
+                            wait: true
+                }
+            }
+        }
+
+    }
+
+    options
+        {
+              buildDiscarder(logRotator(daysToKeepStr: '5', numToKeepStr: '10'))
+        }
+    post {
+        always {
+            echo 'Email Notification'
+            emailext body: "",
+                    subject: "$env.BRANCH_NAME : $currentBuild.currentResult -",
+                    to: ''
+        }
+    }
+
+}
